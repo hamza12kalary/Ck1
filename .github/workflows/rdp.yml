@@ -1,0 +1,24 @@
+name: Windows Free VPS
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Enable Remote Desktop
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+
+    - name: Set Password
+      run: |
+        net user administrator Admin123456789! /add
+        net localgroup administrators administrator /add
+
+    - name: Start Pinggy Tunnel
+      run: |
+        ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 free.pinggy.io
